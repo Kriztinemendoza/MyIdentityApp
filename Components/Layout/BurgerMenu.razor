@@ -1,0 +1,72 @@
+﻿<div class="hamburger-menu" @onclick="ToggleDropdown">
+    <i class="fas fa-bars"></i>
+
+    @if (isDropdownOpen)
+    {
+        <div class="dropdown-menu show">
+           @*  <a class="dropdown-item" href="/" @onclick="CloseDropdown">Home</a> *@
+            @* <a class="dropdown-item" href="/favorites" @onclick="CloseDropdown">Favorites</a> *@
+            <a class="dropdown-item" href="/about" @onclick="CloseDropdown">About</a>
+            <a class="dropdown-item" href="/settings" @onclick="CloseDropdown">Settings</a>
+        </div>
+    }
+</div>
+
+<style>
+    .actions .btn-group {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .hamburger-menu {
+        position: relative;
+        color: white;
+        cursor: pointer;
+        margin-left: auto; /* push it to the far right */
+        margin-top:7px;
+    }
+
+        .hamburger-menu i {
+            font-size: 20px;
+        }
+
+    .dropdown-menu {
+        position: absolute;
+        bottom: 40px; /* show above the menu button */
+        right: 0;
+        background-color: #1e293b;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        z-index: 1000;
+        min-width: 160px;
+    }
+
+    .dropdown-item {
+        display: block;
+        padding: 10px 15px;
+        color: #f8fafc;
+        text-decoration: none;
+        font-size: 14px;
+    }
+
+        .dropdown-item:hover {
+            background-color: #334155;
+            border-radius: 4px;
+        }
+</style>
+
+@code {
+    private bool isDropdownOpen = false;
+
+    private void ToggleDropdown()
+    {
+        isDropdownOpen = !isDropdownOpen;
+    }
+
+    private void CloseDropdown()
+    {
+        isDropdownOpen = false;
+    }
+}
+

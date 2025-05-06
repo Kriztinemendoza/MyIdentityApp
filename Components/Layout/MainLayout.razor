@@ -1,0 +1,61 @@
+﻿@inherits LayoutComponentBase
+@using MyIdentityApp.Interop
+@using MyIdentityApp.Services
+@inject BackgroundService BgService
+@inject IJSRuntime JS
+
+<div class="app-background">
+    <div class="animated-background" style="@BgService.CurrentBackground"></div>
+    <div class="app-container">
+        <main>
+            @Body
+        </main>
+    </div>
+</div>
+
+
+@code {
+    private bool isMenuOpen = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        BgService.OnBackgroundChanged += OnBackgroundChanged;
+        if (string.IsNullOrEmpty(BgService.CurrentBackground))
+            await BgService.SetRandomBackgroundAsync(); // initial background
+
+        MenuInterop.OnCloseMenu = () =>
+        {
+            isMenuOpen = false;
+            StateHasChanged();
+        };
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("addBodyClickHandler");
+        }
+    }
+
+    private void OnBackgroundChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        BgService.OnBackgroundChanged -= OnBackgroundChanged;
+    }
+
+    private void ToggleMenu()
+    {
+        isMenuOpen = !isMenuOpen;
+    }
+
+    private void CloseMenu()
+    {
+        isMenuOpen = false;
+    }
+
+}

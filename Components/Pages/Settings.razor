@@ -1,0 +1,274 @@
+﻿@page "/settings"
+@using System.Threading.Tasks
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<div class="settings-container">
+    <h1>Settings</h1>
+
+    <div class="settings-group">
+        <h2>Notifications</h2>
+
+        <div class="setting-item">
+            <div class="setting-info">
+                <span class="setting-label">Daily Reminders</span>
+                <span class="setting-description">Receive a daily identity verse</span>
+            </div>
+            <label class="toggle">
+                <input type="checkbox" @bind="dailyNotifications">
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+
+        <div class="setting-item">
+            <div class="setting-info">
+                <span class="setting-label">Reminder Time</span>
+            </div>
+            <select @bind="reminderTime" disabled="@(!dailyNotifications)" class="time-select">
+                <option value="6:00 AM">6:00 AM</option>
+                <option value="7:00 AM">7:00 AM</option>
+                <option value="8:00 AM">8:00 AM</option>
+                <option value="9:00 AM">9:00 AM</option>
+                <option value="12:00 PM">12:00 PM</option>
+                <option value="5:00 PM">5:00 PM</option>
+                <option value="8:00 PM">8:00 PM</option>
+                <option value="10:00 PM">10:00 PM</option>
+            </select>
+        </div>
+    </div>
+
+    @* <div class="settings-group">
+        <h2>Appearance</h2>
+
+        <div class="setting-item">
+            <div class="setting-info">
+                <span class="setting-label">Dark Mode</span>
+            </div>
+            <label class="toggle">
+                <input type="checkbox" @bind="darkMode">
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+
+        <div class="setting-item">
+            <div class="setting-info">
+                <span class="setting-label">Font Size</span>
+            </div>
+            <select @bind="fontSize" class="font-select">
+                <option value="small">Small</option>
+                <option value="medium">Medium</option>
+                <option value="large">Large</option>
+            </select>
+        </div>
+    </div> *@
+
+    <div class="settings-group">
+        <h2>About</h2>
+
+        <div class="setting-item link-item" @onclick="OpenAbout">
+            <div class="setting-info">
+                <span class="setting-label">About This App</span>
+            </div>
+            <i class="fas fa-chevron-right"></i>
+        </div>
+
+        <div class="setting-item link-item" @onclick="ShareApp">
+            <div class="setting-info">
+                <span class="setting-label">Share App</span>
+            </div>
+            <i class="fas fa-chevron-right"></i>
+        </div>
+
+        <div class="setting-item link-item" @onclick="RateApp">
+            <div class="setting-info">
+                <span class="setting-label">Rate App</span>
+            </div>
+            <i class="fas fa-chevron-right"></i>
+        </div>
+    </div>
+
+    <div class="app-version">
+        Version 1.0.0
+    </div>
+</div>
+
+@code {
+    private bool dailyNotifications = true;
+    private string reminderTime = "8:00 AM";
+    private bool darkMode = false;
+    private string fontSize = "medium";
+
+    protected override async Task OnInitializedAsync()
+    {
+        // In a real app, you would load these settings from storage
+        await base.OnInitializedAsync();
+    }
+
+    private void SaveSettings()
+    {
+        // In a real app, you would save settings to storage
+        // For example: await SecureStorage.SetAsync("DailyNotifications", dailyNotifications.ToString());
+    }
+
+    private void OpenAbout()
+    {
+        NavigationManager.NavigateTo("/about");
+    }
+
+    private async Task ShareApp()
+    {
+#if ANDROID || IOS
+    try
+    {
+        await Share.RequestAsync(new ShareTextRequest
+        {
+            Text = "Check out 'My Identity in Christ' app - daily reminders of who you are in Christ!",
+            Title = "Share My Identity in Christ App"
+        });
+    }
+    catch (Exception ex)
+    {
+        await JSRuntime.InvokeVoidAsync("alert", $"Sorry, could not share: {ex.Message}");
+    }
+#endif
+    }
+
+    private async Task RateApp()
+    {
+        // In a real app, this would open the appropriate app store
+        // For demo purposes, we'll just show an alert
+        await JSRuntime.InvokeVoidAsync("alert", "Thank you for wanting to rate our app!");
+    }
+}
+
+<style>
+    .settings-container {
+        padding: 20px;
+        margin-bottom: 70px;
+    }
+
+    h1 {
+        text-align: center;
+        margin-bottom: 30px;
+       /*  color: #3a506b; */
+    }
+
+    .settings-group {
+        margin-bottom: 30px;
+        background-color: white;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    h2 {
+        font-size: 18px;
+        margin-bottom: 15px;
+       /*  color: #475569; */
+    }
+
+    .setting-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+    .setting-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .setting-label {
+        font-size: 16px;
+        color: #334155;
+        margin-bottom: 4px;
+    }
+
+    .setting-description {
+        font-size: 14px;
+        color: #64748b;
+    }
+
+    .toggle {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 26px;
+    }
+
+        .toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+    .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #cbd5e1;
+        transition: .4s;
+        border-radius: 34px;
+    }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+    input:checked + .toggle-slider {
+        background-color: #3b82f6;
+    }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(24px);
+        }
+
+    .time-select, .font-select {
+        padding: 8px 10px;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        background-color: #f8fafc;
+        color: #334155;
+        outline: none;
+    }
+
+        .time-select:disabled {
+            opacity: 0.5;
+        }
+
+    .link-item {
+        cursor: pointer;
+    }
+
+        .link-item:hover {
+            background-color: #f8fafc;
+        }
+
+        .link-item i {
+            color: #94a3b8;
+        }
+
+    .app-version {
+        text-align: center;
+        margin-top: 30px;
+        /* color: #94a3b8; */
+        font-size: 14px;
+    }
+</style>

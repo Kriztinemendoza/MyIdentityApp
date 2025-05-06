@@ -1,0 +1,255 @@
+﻿@page "/"
+@using MyIdentityApp.Components.Layout
+@using MyIdentityApp.Models
+@using MyIdentityApp.Services
+
+@inject NavigationManager NavigationManager
+@inject ScriptureService ScriptureService
+@inject BackgroundService BgService
+@inject TtsService Tts
+@inject AudioService Audio
+
+
+<div class="daily-container">
+    @if (dailyScripture == null)
+    {
+        <div class="loading-state">
+            <p>Loading today’s affirmation...</p>
+            <!-- You can add a spinner here -->
+        </div>
+    }
+    else
+    {
+        <div class="scripture-wrapper @(isReflecting ? "reflecting" : "")">
+            <div class="scripture-card @(isAnimating ? animationClass : "")">
+
+                <div class="affirmation @(isReflecting ? "small-text" : "")">
+                    @dailyScripture.Affirmation
+                </div>
+
+                @if (!isReflecting)
+                {
+                    <div class="theme">
+                        #@dailyScripture.IdentityTheme
+                    </div>
+
+                    <div class="scripture-text">
+                        "@dailyScripture.Text"
+                    </div>
+
+                    <div class="reference">
+                        - @dailyScripture.Reference
+                    </div>
+                }
+
+                @if (isReflecting)
+                {
+                    <div class="reflection">
+                        @dailyScripture.Reflection
+                    </div>
+                }
+
+            </div>
+        </div>
+
+        <div class="actions">
+            <button class="btn @(dailyScripture.IsFavorite ? "btn-favorite-active" : "btn-favorite")"
+                    @onclick="() => ToggleFavorite(dailyScripture.Id)"
+                    title="Favorite">
+                <i class="fas fa-heart"></i>
+            </button>
+
+            @if (!isReflecting)
+            {
+                <button class="btn" @onclick="ReadAffirmation" title="Listen">
+                    <i class="fas fa-volume-up"></i>
+                </button>
+
+                <button class="btn" @onclick="Reflect" title="Reflection">
+                    <i class="fas fa-praying-hands"></i>
+                </button>
+            }
+
+            @if (isReflecting)
+            {
+                <button class="btn" @onclick="Back" title="Back to Affirmation">
+                    <i class="fas fa-book-open"></i>
+                </button>
+
+                <button class="btn" @onclick="ReadReflection" title="Listen">
+                    <i class="fas fa-volume-up"></i>
+                </button>
+            }
+
+            <button class="btn" @onclick="GetRandom" title="Next">
+                <i class="fas fa-wand-magic-sparkles"></i>
+            </button>
+
+            <button class="btn" @onclick="ChangeBackground" title="Change Background Image">
+                <i class="fas fa-image"></i>
+            </button>
+
+            <button class="btn" @onclick="ChangeBackgroundMusic" title="Change Background Music">
+                <i class="fas fa-headphones"></i>
+            </button>
+
+            <button class="btn btn-share" @onclick="ShareScripture" title="Share">
+                <i class="fas fa-share-alt"></i>
+            </button>
+
+            <BurgerMenu />
+        </div>
+
+        <div class="explore-more" style="display:none">
+            <div class="theme-buttons">
+                @foreach (var theme in themes)
+                {
+                    <a href="/themes/@theme.Name" class="theme-button">
+                        <i class="fas fa-@theme.IconName"></i>
+                        <span>@theme.Name</span>
+                    </a>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private Scripture dailyScripture;
+    private List<IdentityTheme> themes;
+    private string backgroundStyle;
+    private bool isReflecting = false;
+    private bool isAnimating = false;
+    private string animationClass = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        //dailyScripture = ScriptureService.GetDailyScripture();
+        dailyScripture = await ScriptureService.GetRandomAsync();
+        themes = await ScriptureService.GetAllThemesAsync();
+        //await Audio.PlayRandomBackgroundMusicAsync();
+
+        if (dailyScripture == null)
+        {
+            // Fallback (show message, set default, log error, etc.)
+            dailyScripture = new Scripture
+                {
+                    Affirmation = "You're deeply loved by God.",
+                    IdentityTheme = "Loved",
+                    Reference = "Romans 5:8",
+                    Text = "But God demonstrates His own love for us in this: While we were still sinners, Christ died for us.",
+                    Reflection = "God's love isn’t based on my perfection — it’s based on His. I'm receiving His grace today."
+                };
+
+            // Optionally: log it
+            AppLogger.LogWarning<Home>("Fallback used: dailyScripture was null.");
+        }
+    }
+
+    // protected override void OnInitialized()
+    // {
+    //     dailyScripture = ScriptureService.GetRandom();
+    //     themes = ScriptureService.GetAllThemes();
+    // }
+
+    private void ToggleFavorite(int scriptureId)
+    {
+        ScriptureService.ToggleFavorite(scriptureId);
+        // Force a UI refresh
+        StateHasChanged();
+    }
+
+    private async Task ShareScripture()
+    {
+#if ANDROID || IOS
+    try
+    {
+    await Share.RequestAsync(new ShareTextRequest
+    {
+    Text = $"\"{dailyScripture.Text}\" - {dailyScripture.Reference}\n\nMy Identity in Christ",
+    Title = "Share Scripture"
+    });
+    }
+    catch (Exception ex)
+    {
+    // Handle exception or show message to user
+    Console.WriteLine($"Sharing failed: {ex.Message}");
+    }
+#endif
+    }
+
+    private async Task GetRandom()
+    {
+        // 🛑 Stop any currently playing TTS
+        Tts.Stop();
+
+        // Switch back to normal view and update scripture
+        isReflecting = false;
+        dailyScripture = await ScriptureService.GetRandomAsync();
+
+        // Optionally also change background or music
+        await ChangeBackground();
+    }
+
+    private async Task Reflect()
+    {
+        Tts.Stop();
+
+        isAnimating = true;
+        animationClass = "fade-out";
+        StateHasChanged();
+
+        await Task.Delay(200); // wait for fade out
+
+        isReflecting = true;
+
+        animationClass = "fade-in";
+        StateHasChanged();
+
+        await Task.Delay(400); // wait for fade in
+        isAnimating = false;
+    }
+
+    private async Task Back()
+    {
+        Tts.Stop();
+
+        isAnimating = true;
+        animationClass = "fade-out";
+        StateHasChanged();
+
+        await Task.Delay(200);
+
+        isReflecting = false;
+
+        animationClass = "fade-in";
+        StateHasChanged();
+
+        await Task.Delay(400);
+        isAnimating = false;
+    }
+
+    private async Task ChangeBackground()
+    {
+        await BgService.SetRandomBackgroundAsync();
+    }
+
+    private async Task ChangeBackgroundMusic()
+    {
+        await Audio.PlayRandomBackgroundMusicAsync();
+    }
+
+    private async Task ReadAffirmation()
+    {
+        var fullText = $"{dailyScripture.Affirmation}. {dailyScripture.Text}. {dailyScripture.Reference}";
+
+        await Tts.StopAndSpeakAsync(fullText);
+    }
+
+    private async Task ReadReflection()
+    {
+        var fullText = $"{dailyScripture.Affirmation}. {dailyScripture.Reflection}";
+        await Tts.StopAndSpeakAsync(fullText);
+    }
+}
+

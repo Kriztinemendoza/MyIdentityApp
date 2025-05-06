@@ -1,0 +1,50 @@
+[
+  {
+    "Id": 1,
+    "Name": "Loved",
+    "Description": "Verses about God's love for us",
+    "IconName": "heart"
+  },
+  {
+    "Id": 2,
+    "Name": "Forgiven",
+    "Description": "Verses about forgiveness in Christ",
+    "IconName": "check-circle"
+  },
+  {
+    "Id": 3,
+    "Name": "Chosen",
+    "Description": "Verses about being chosen by God",
+    "IconName": "star"
+  },
+  {
+    "Id": 4,
+    "Name": "New Creation",
+    "Description": "Verses about being a new creation in Christ",
+    "IconName": "refresh"
+  },
+  {
+    "Id": 5,
+    "Name": "Child of God",
+    "Description": "Verses about being God's children",
+    "IconName": "user"
+  },
+  {
+    "Id": 6,
+    "Name": "Accepted",
+    "Description": "Verses about being accepted in Christ",
+    "IconName": "user-check"
+  },
+  {
+    "Id": 7,
+    "Name": "Significant",
+    "Description": "Verses about being significant in Christ",
+    "IconName": "gem"
+  },
+  {
+    "Id": 8,
+    "Name": "Secure",
+    "Description": "Verses about being secured in Christ",
+    "IconName": "shield-alt"
+  }
+]

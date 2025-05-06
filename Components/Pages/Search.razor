@@ -1,0 +1,112 @@
+﻿@page "/search"
+@using MyIdentityApp.Models
+@using MyIdentityApp.Services
+@inject ScriptureService ScriptureService
+
+<div class="search-container">
+    <h1>Search Scriptures</h1>
+
+    <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" 
+               placeholder="Search by theme, reference or text..." 
+               @bind="searchQuery" 
+               @bind:event="oninput" 
+               />
+        @if (!string.IsNullOrEmpty(searchQuery))
+        {
+            <button class="clear-button" @onclick="ClearSearch">
+                <i class="fas fa-times"></i>
+            </button>
+        }
+    </div>
+
+    @if (!string.IsNullOrEmpty(searchQuery) && searchResults != null)
+    {
+        <div class="results-count">
+            Found @searchResults.Count results
+        </div>
+
+        @if (searchResults.Any())
+        {
+            <div class="scripture-list">
+                @foreach (var scripture in searchResults)
+                {
+                    <div class="scripture-card">
+                        <div class="theme-tag">@scripture.IdentityTheme</div>
+                        <div class="affirmation">@scripture.Affirmation</div>
+                        <div class="scripture-text">"@scripture.Text"</div>
+                        <div class="reference">- @scripture.Reference</div>
+
+                        <div class="actions">
+                            <button class="btn @(scripture.IsFavorite ? "btn-favorite-active" : "btn-favorite")"
+                                    @onclick="() => ToggleFavorite(scripture.Id)">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                            <button class="btn btn-share" @onclick="() => ShareScripture(scripture)">
+                                <i class="fas fa-share-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="empty-search">
+                <i class="fas fa-search"></i>
+                <p>No scriptures found for "@searchQuery"</p>
+                <p>Try different keywords or search terms</p>
+            </div>
+        }
+    }
+</div>
+
+@code {
+    private string searchQuery = string.Empty;
+    private List<Scripture> searchResults = new();
+
+    private async Task SearchScriptures(ChangeEventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(searchQuery))
+        {
+            searchResults.Clear();
+        }
+        else
+        {
+            // searchResults = ScriptureService.SearchScriptures(searchQuery);
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void ClearSearch()
+    {
+        searchQuery = "";
+        searchResults.Clear();
+    }
+
+    private void ToggleFavorite(int scriptureId)
+    {
+        ScriptureService.ToggleFavorite(scriptureId);
+        SearchScriptures(null); // Refresh search
+    }
+
+    private async Task ShareScripture(Scripture scripture)
+    {
+#if ANDROID || IOS
+        try
+        {
+            await Share.RequestAsync(new ShareTextRequest
+            {
+                Text = $"\"{scripture.Text}\" - {scripture.Reference}\n\nMy Identity in Christ",
+                Title = "Share Scripture"
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Sharing failed: {ex.Message}");
+        }
+#endif
+    }
+}

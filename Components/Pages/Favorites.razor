@@ -1,0 +1,212 @@
+﻿@page "/favorites"
+@using MyIdentityApp.Models
+@using MyIdentityApp.Services
+@inject ScriptureService ScriptureService
+@inject NavigationManager NavigationManager
+
+<div class="favorites-container">
+    <h1>My Favorite Scriptures</h1>
+
+    @if (favoriteScriptures != null && favoriteScriptures.Any())
+    {
+        <div class="scripture-list">
+            @foreach (var scripture in favoriteScriptures)
+            {
+                <div class="scripture-card">
+                    <div class="affirmation">
+                        @scripture.Affirmation
+                    </div>
+
+                    <div class="scripture-text">
+                        "@scripture.Text"
+                    </div>
+
+                    <div class="reference">
+                        - @scripture.Reference
+                    </div>
+
+                    <div class="actions">
+                        <button class="btn btn-favorite-active"
+                                @onclick="() => ToggleFavorite(scripture.Id)">
+                            <i class="fas fa-heart"></i>
+                        </button>
+
+                        <button class="btn btn-share" @onclick="() => ShareScripture(scripture)">
+                            <i class="fas fa-share-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-heart"></i>
+            </div>
+            <p>You haven't saved any favorites yet.</p>
+            <p>Tap the heart icon on any scripture to save it here.</p>
+            <button class="btn-explore" @onclick="NavigateToHome">
+                Explore Scriptures
+            </button>
+        </div>
+    }
+</div>
+
+@code {
+    private List<Scripture> favoriteScriptures;
+
+    protected override void OnInitialized()
+    {
+        LoadFavorites();
+    }
+
+    private void LoadFavorites()
+    {
+        favoriteScriptures = ScriptureService.GetFavorites();
+    }
+
+    private void ToggleFavorite(int scriptureId)
+    {
+        ScriptureService.ToggleFavorite(scriptureId);
+        // Refresh the favorites list
+        LoadFavorites();
+    }
+
+    private async Task ShareScripture(Scripture scripture)
+    {
+#if ANDROID || IOS
+    try
+    {
+        await Share.RequestAsync(new ShareTextRequest
+        {
+            Text = $"\"{scripture.Text}\" - {scripture.Reference}\n\nMy Identity in Christ",
+            Title = "Share Scripture"
+        });
+    }
+    catch (Exception ex)
+    {
+        // Handle exception or show message to user
+        Console.WriteLine($"Sharing failed: {ex.Message}");
+    }
+#endif
+    }
+
+    private void NavigateToHome()
+    {
+        NavigationManager.NavigateTo("/");
+    }
+}
+
+<style>
+    .favorites-container {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        margin-bottom: 70px;
+    }
+
+    h1 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #3a506b;
+    }
+
+    .scripture-list {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .scripture-card {
+        background-color: #ffffff;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .affirmation {
+        font-size: 20px;
+        font-weight: bold;
+        color: #1e3a8a;
+        margin-bottom: 15px;
+    }
+
+    .scripture-text {
+        font-size: 16px;
+        line-height: 1.6;
+        color: #334155;
+        margin-bottom: 12px;
+        font-style: italic;
+    }
+
+    .reference {
+        font-weight: bold;
+        text-align: right;
+        color: #64748b;
+        margin-bottom: 15px;
+    }
+
+    .actions {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .btn {
+        padding: 8px 12px;
+        border-radius: 50px;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-favorite-active {
+        background-color: #fee2e2;
+        color: #dc2626;
+    }
+
+    .btn-share {
+        background-color: #f1f5f9;
+        color: #64748b;
+    }
+
+    .empty-state {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        padding: 40px 20px;
+        color: #64748b;
+    }
+
+    .empty-icon {
+        font-size: 64px;
+        color: #e2e8f0;
+        margin-bottom: 20px;
+    }
+
+    .btn-explore {
+        margin-top: 20px;
+        padding: 12px 24px;
+        background-color: #3b82f6;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+        .btn-explore:hover {
+            background-color: #2563eb;
+        }
+</style>

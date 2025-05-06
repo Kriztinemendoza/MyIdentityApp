@@ -1,0 +1,181 @@
+﻿@page "/about"
+@using MyIdentityApp.Services
+@inject NavigationManager NavigationManager
+@inject LogoService LogoService
+
+<div class="about-container">
+    <div class="about-header">
+        <button class="back-button" @onclick="NavigateBack">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        <h1>About My Identity in Christ App</h1>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(logoPath))
+    {
+        <div class="app-logo">
+            <img src="file://@logoPath" alt="App Logo" />
+        </div>
+
+    }
+
+    <p class="app-description">
+        This app is designed to remind you daily of who you are in Christ. In a world that constantly tries to define us by our achievements, appearance, or possessions, this app stands as a reminder of our true identity as found in God's Word.
+    </p>
+
+    <div class="scripture-highlight">
+        "See what great love the Father has lavished on us, that we should be called children of God! And that is what we are!"
+        <div class="reference">1 John 3:1</div>
+    </div>
+
+    <h3>App Features</h3>
+
+    <ul class="feature-list">
+        <li>
+            <i class="fas fa-calendar-day"></i>
+            <div>
+                <span>Daily Scripture</span>
+                <p>A new identity verse each day</p>
+            </div>
+        </li>
+        @*   <li>
+        <i class="fas fa-layer-group"></i>
+        <div>
+        <span>Theme Categories</span>
+        <p>Browse scriptures by identity themes</p>
+        </div>
+        </li> *@
+        <li>
+            <i class="fas fa-heart"></i>
+            <div>
+                <span>Favorites</span>
+                <p>Save your favorite identity verses</p>
+            </div>
+        </li>
+        <li>
+            <i class="fas fa-bell"></i>
+            <div>
+                <span>Reminders</span>
+                <p>Daily notifications of your identity in Christ</p>
+            </div>
+        </li>
+        <li>
+            <i class="fas fa-volume-up"></i>
+            <div>
+                <span>Text to Speech</span>
+                <p>Listen to daily affirmations and reflections</p>
+            </div>
+        </li>
+        <li>
+            <i class="fas fa-share-alt"></i>
+            <div>
+                <span>Share</span>
+                <p>Share our Identity in Christ to various channels</p>
+            </div>
+        </li>
+    </ul>
+
+    <div class="version-info">
+        <div>Version 1.0.0</div>
+        <div>© 2025 My Identity in Christ</div>
+    </div>
+</div>
+
+@code {
+    private string? logoPath;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            logoPath = await LogoService.GetLogoPathAsync();
+        }
+        catch (Exception ex)
+        {
+            AppLogger.LogError<About>("GetLogoPathAsync", ex);
+        }
+        
+    }
+
+    private void NavigateBack()
+    {
+        NavigationManager.NavigateTo("/settings");
+    }
+
+}
+
+<style>
+    .app-logo img {
+        width: 60px;
+        height: 60px;
+        object-fit: contain;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+
+    h1 {
+        flex-grow: 1;
+        text-align: center;
+        font-size: 24px;
+    }
+
+    h2 {
+        text-align: center;
+        margin-bottom: 20px;
+        font-size: 24px;
+    }
+
+    h3 {
+        margin-bottom: 20px;
+        font-size: 20px;
+    }
+
+    .reference {
+        color: #334155;
+    }
+
+    .feature-list {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 30px 0;
+    }
+
+        .feature-list li {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .feature-list i {
+            font-size: 24px;
+            color: #3b82f6;
+            background-color: #e0f2fe;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            margin-right: 15px;
+        }
+
+        .feature-list span {
+            font-weight: bold;
+            color: #334155;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .feature-list p {
+            margin: 0;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+    .version-info {
+        text-align: center;
+        /* color: #94a3b8; */
+        font-size: 14px;
+        line-height: 1.5;
+    }
+</style>
