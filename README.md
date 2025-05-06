@@ -2,6 +2,8 @@
 
 **MyIdentityApp** is a faith-based MAUI mobile application designed to encourage spiritual growth by presenting randomized Bible scriptures, categorized by themes such as Identity, Faith, Peace, and more.
 
+![MyIdentityApp](https://raw.githubusercontent.com/Kriztinemendoza/MyIdentityApp/main/MyIdentityApp.png)
+
 ## 📌 Features
 
 - 🎯 **Random Scripture Generator**  
